@@ -1,0 +1,33 @@
+# Local Environment Settings
+spring:
+  # Database (MySQL - Railway)
+  datasource:
+    url: jdbc:mysql://turntable.proxy.rlwy.net:57744/railway
+    username: root
+    password: KpFSKQmIDQQbbraZXDdLrfQooVzSsSCu
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # JPA/Hibernate
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        default_batch_fetch_size: 100
+        dialect: org.hibernate.dialect.MySQLDialect
+        type:
+          preferred_uuid_jdbc_type: CHAR
+    open-in-view: false
+
+  # Flyway
+  flyway:
+    enabled: false
+    baseline-on-migrate: true
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
+    repair-on-startup: true
+
+

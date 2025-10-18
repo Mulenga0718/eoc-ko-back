@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: eoc-ko-back
+  profiles:
+    active: local # 기본 활성 프로필을 'local'로 설정
+# Server Port
+server:
+  port: 8080
+
+# Springdoc (Swagger UI)
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+
+# JWT
+jwt:
+  secret: 'wJalr7JtL4VklA4aEW/B1A3oA8gQyJ5aA+8eN/aT4bHq8cW+lY6zR/aN9vY8bV7cW+lY6zR/aN9vY8bV7cW+lY6zR/aN9vY8bV7cW+lY6zR/aN9vY8bV7c='
+  token-validity-in-seconds: 86400 # 1일 (Access Token)
+  refresh-token-validity-in-seconds: 604800 # 7일 (Refresh Token)
+
+# File
+file:
+  upload-dir: uploads/

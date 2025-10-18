@@ -1,0 +1,24 @@
+# Production Environment Settings
+spring:
+  # Database (MySQL)
+  datasource:
+    url: jdbc:mysql://turntable.proxy.rlwy.net:57744/railway # replace with env var in production
+    username: root # replace with env var
+    password: KpFSKQmIDQQbbraZXDdLrfQooVzSsSCu # replace with env var
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  # JPA/Hibernate
+  jpa:
+      hibernate:
+        ddl-auto: validate
+    properties:
+      hibernate:
+        show_sql: false # Don't show SQL in production logs
+        dialect: org.hibernate.dialect.MySQLDialect
+
+  # Flyway
+  flyway:
+    enabled: true
+    url: ${spring.datasource.url}
+    user: ${spring.datasource.username}
+    password: ${spring.datasource.password}
