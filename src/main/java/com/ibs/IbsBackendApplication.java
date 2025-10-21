@@ -17,7 +17,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 @SpringBootApplication
 @EnableConfigurationProperties(JwtProperties.class)
 @EnableCaching
-@EnableJpaAuditing
+//@EnableJpaAuditing
 public class IbsBackendApplication {
 
     public static void main(String[] args) {

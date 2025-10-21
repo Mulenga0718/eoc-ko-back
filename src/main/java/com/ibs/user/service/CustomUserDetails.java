@@ -1,8 +1,9 @@
 package com.ibs.user.service;
 
-import com.ibs.user.domain.Role;
 import com.ibs.user.domain.User;
+import com.ibs.user.domain.UserStatus;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -12,61 +13,31 @@ import java.util.Collections;
 import java.util.UUID;
 
 @Getter
+@RequiredArgsConstructor
 public class CustomUserDetails implements UserDetails {
 
-    private User user;
-    private UUID id;
-    private String username;
-    private String password;
-    private Collection<? extends GrantedAuthority> authorities;
+    private final User user;
 
-    public CustomUserDetails(User user) {
-        this.user = user;
-        this.id = user.getId();
-        this.username = user.getUsername();
-        this.password = user.getPassword();
-        this.authorities = Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
-    }
-
-    public CustomUserDetails(
-            UUID id,
-            String username,
-            String name,
-            String email,
-            String profileImage,
-            String jobTitle,
-            Role role,
-            Collection<? extends GrantedAuthority> authorities
-    ) {
-        this.id = id;
-        this.username = username;
-        this.password = "";
-        this.authorities = authorities;
-
-        this.user = User.builder()
-                .id(id)
-                .username(username)
-                .name(name)
-                .email(email)
-                .profileImage(profileImage)
-                .jobTitle(jobTitle)
-                .role(role)
-                .build();
+    public UUID getId() {
+        return user.getId();
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return authorities;
+        if (user.getRole() == null) {
+            return Collections.emptyList();
+        }
+        return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()));
     }
 
     @Override
     public String getPassword() {
-        return password;
+        return user.getPassword();
     }
 
     @Override
     public String getUsername() {
-        return username;
+        return user.getUsername();
     }
 
     @Override
@@ -76,7 +47,8 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isAccountNonLocked() {
-        return true;
+        // INACTIVE 상태를 계정 잠금으로 간주
+        return user.getStatus() != UserStatus.INACTIVE;
     }
 
     @Override
@@ -86,6 +58,7 @@ public class CustomUserDetails implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-        return true;
+        // ACTIVE 상태일 때만 계정 활성화
+        return user.getStatus() == UserStatus.ACTIVE;
     }
 }

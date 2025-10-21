@@ -39,34 +39,52 @@ public class AuthService {
     private final JwtProperties jwtProperties;
 
     public UUID signup(SignUpRequest signUpRequest) {
-        if (userRepository.findByUsername(signUpRequest.username()).isPresent()) {
-            throw new BusinessException(ErrorCode.INVALID_INPUT);
+        String loginId = signUpRequest.loginId() != null ? signUpRequest.loginId().trim() : "";
+        String email = signUpRequest.email() != null ? signUpRequest.email().trim() : "";
+        String name = signUpRequest.name() != null ? signUpRequest.name().trim() : "";
+
+        if (loginId.isEmpty()) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT, "Login ID cannot be blank.");
         }
 
-        if (signUpRequest.password() == null || signUpRequest.password().trim().isEmpty()) {
+        if (email.isEmpty()) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT, "Email cannot be blank.");
+        }
+
+        if (userRepository.findByUsername(loginId).isPresent()) {
+            throw new BusinessException(ErrorCode.DUPLICATE_ENTITY, "Login ID already exists.");
+        }
+
+        if (userRepository.findByEmail(email).isPresent()) {
+            throw new BusinessException(ErrorCode.DUPLICATE_ENTITY, "Email already exists.");
+        }
+
+        String rawPassword = signUpRequest.password();
+        if (rawPassword == null || rawPassword.isBlank()) {
             throw new BusinessException(ErrorCode.INVALID_INPUT, "Password cannot be empty.");
         }
 
         User user = userMapper.toUser(signUpRequest);
-        user.updatePassword(passwordEncoder.encode(signUpRequest.password()));
+        user.setUsername(loginId);
+        user.setEmail(email);
+        user.setName(name);
+        user.updatePassword(passwordEncoder.encode(rawPassword));
         user.updateRole(signUpRequest.role() != null ? signUpRequest.role() : Role.MEMBER);
-        user.updateDetails(
-                user.getUsername(),
-                user.getName(),
-                user.getEmail(),
-                user.getPhoneNumber(),
-                user.getJobTitle(),
-                null,
-                UserStatus.ACTIVE
-        );
+        user.setStatus(UserStatus.ACTIVE);
 
         User savedUser = userRepository.save(user);
         return savedUser.getId();
     }
 
     public TokenResponse login(LoginRequest loginRequest) {
+        String loginId = loginRequest.loginId() != null ? loginRequest.loginId().trim() : "";
+
+        if (loginId.isEmpty()) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT, "Login ID cannot be blank.");
+        }
+
         UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(loginRequest.username(), loginRequest.password());
+                new UsernamePasswordAuthenticationToken(loginId, loginRequest.password());
 
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
@@ -123,4 +141,3 @@ public class AuthService {
         );
     }
 }
-

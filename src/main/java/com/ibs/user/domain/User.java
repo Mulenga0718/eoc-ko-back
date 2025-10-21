@@ -1,29 +1,31 @@
 package com.ibs.user.domain;
 
-import com.ibs.global.common.Auditable;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.GenericGenerator;
 
 import java.util.UUID;
 
 @Entity
-@Table(name = "users")
 @Getter
+@Setter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Builder
-public class User extends Auditable {
+@Table(name = "users")
+public class User {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    @Column(name = "user_id", length = 36, nullable = false, updatable = false)
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    @Column(name = "user_id", updatable = false, nullable = false)
     private UUID id;
 
     @Column(nullable = false, unique = true)
     private String username;
 
-    @Column
-    private String password; // Nullable for social logins
+    @Column(nullable = false)
+    private String password;
 
     @Column(nullable = false)
     private String name;
@@ -31,29 +33,28 @@ public class User extends Auditable {
     @Column(nullable = false, unique = true)
     private String email;
 
-    private String phoneNumber;
-
-    private String jobTitle;
-
-    private String profileImage;
-
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private Role role;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
     private UserStatus status;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    @Builder.Default
-    private AuthProvider provider = AuthProvider.LOCAL; // LOCAL, GOOGLE, NAVER
+    private String profileImage;
+    private String jobTitle;
+    private String phoneNumber;
 
-    @Column
-    private String providerId; // External provider user id (sub)
+    // For Social Login
+    private String provider;
+    private String providerId;
 
-    // --- Business Methods ---
+    public void updatePassword(String password) {
+        this.password = password;
+    }
+
+    public void updateRole(Role role) {
+        this.role = role;
+    }
+
     public void updateDetails(String username, String name, String email, String phoneNumber, String jobTitle, String profileImage, UserStatus status) {
         this.username = username;
         this.name = name;
@@ -63,13 +64,4 @@ public class User extends Auditable {
         this.profileImage = profileImage;
         this.status = status;
     }
-
-    public void updatePassword(String newPassword) {
-        this.password = newPassword;
-    }
-
-    public void updateRole(Role newRole) {
-        this.role = newRole;
-    }
 }
-

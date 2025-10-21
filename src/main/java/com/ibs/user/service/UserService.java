@@ -21,76 +21,55 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Transactional
     public UserResponse createUser(UserCreateRequest request) {
-        userRepository.findByUsername(request.username()).ifPresent(u -> {
-            throw new BusinessException(ErrorCode.DUPLICATE_ENTITY, "Username already exists");
-        });
-
-        userRepository.findByEmail(request.email()).ifPresent(u -> {
-            throw new BusinessException(ErrorCode.DUPLICATE_ENTITY, "Email already exists");
-        });
-
+        if (userRepository.findByUsername(request.username()).isPresent()) {
+            throw new BusinessException(ErrorCode.INVALID_INPUT, "Username already exists");
+        }
         User user = User.builder()
                 .username(request.username())
-                .password(request.password() != null ? passwordEncoder.encode(request.password()) : null)
+                .password(passwordEncoder.encode(request.password()))
                 .name(request.name())
                 .email(request.email())
                 .phoneNumber(request.phoneNumber())
                 .jobTitle(request.jobTitle())
                 .role(request.role())
                 .status(request.status())
+                .provider("LOCAL")
                 .build();
-
         User savedUser = userRepository.save(user);
         return UserResponse.from(savedUser);
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<UserResponse> getAllUsers(PageRequest pageRequest) {
-        Pageable pageable = pageRequest.of();
+        Pageable pageable = pageRequest.of(); // Use the 'of()' method from the custom PageRequest
         Page<User> usersPage = userRepository.findAll(pageable);
-        return new PageResponse<>(usersPage.map(UserResponse::from));
+        Page<UserResponse> userResponsesPage = usersPage.map(UserResponse::from);
+        return new PageResponse<>(userResponsesPage); // Use the constructor that accepts a Page object
     }
 
-    @Transactional
-    public void updateUserRole(UUID userId, Role newRole) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND, "User not found"));
-        user.updateRole(newRole);
-    }
-
-    @Transactional
-    public void updateUser(UUID userId, UserUpdateRequest request) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND, "User not found"));
-
-        user.updateDetails(
-                request.username(),
-                request.name(),
-                request.email(),
-                request.phoneNumber(),
-                request.jobTitle(),
-                request.profileImage(),
-                request.status()
-        );
-
-        if (request.password() != null && !request.password().isEmpty()) {
-            user.updatePassword(passwordEncoder.encode(request.password()));
-        }
+    public void updateUserRole(UUID userId, Role role) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        user.updateRole(role);
         userRepository.save(user);
     }
 
-    @Transactional
+    public void updateUser(UUID userId, UserUpdateRequest request) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
+        user.setName(request.name());
+        user.setJobTitle(request.jobTitle());
+        user.setPhoneNumber(request.phoneNumber());
+        userRepository.save(user);
+    }
+
     public void deleteUser(UUID userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND, "User not found"));
+        User user = userRepository.findById(userId).orElseThrow(() -> new BusinessException(ErrorCode.ENTITY_NOT_FOUND));
         userRepository.delete(user);
     }
 }
-

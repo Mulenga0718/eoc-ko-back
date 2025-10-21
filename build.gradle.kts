@@ -30,6 +30,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("org.springframework.boot:spring-boot-configuration-processor")
     implementation("org.springframework.boot:spring-boot-starter-cache")
@@ -68,6 +69,7 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
     implementation("org.mapstruct:mapstruct:$mapstructVersion")
     annotationProcessor("org.mapstruct:mapstruct-processor:$mapstructVersion")
+    annotationProcessor("org.projectlombok:lombok-mapstruct-binding:0.2.0") // Lombok & MapStruct 연동
     implementation("com.github.ben-manes.caffeine:caffeine")
 
 
