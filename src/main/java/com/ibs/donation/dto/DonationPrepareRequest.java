@@ -30,7 +30,9 @@ public record DonationPrepareRequest(
         String donorPhone,
 
         @NotNull(message = "Receipt required status is required.")
-        boolean receiptRequired
+        boolean receiptRequired,
+
+        Integer recurringChargeDay
 ) {
     public DonationPrepareRequest {
         if (donationType == null) {

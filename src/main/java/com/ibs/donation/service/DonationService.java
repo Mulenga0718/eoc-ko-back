@@ -2,14 +2,19 @@ package com.ibs.donation.service;
 
 import com.ibs.donation.client.TossPaymentsClient;
 import com.ibs.donation.client.dto.TossPaymentsConfirmResponse;
+import com.ibs.donation.config.RecurringDonationProperties;
 import com.ibs.donation.config.TossPaymentsProperties;
 import com.ibs.donation.domain.Donation;
+import com.ibs.donation.domain.DonationType;
+import com.ibs.donation.domain.RecurringDonationSchedule;
 import com.ibs.donation.dto.DonationConfirmRequest;
 import com.ibs.donation.dto.DonationPrepareRequest;
 import com.ibs.donation.dto.DonationPrepareResponse;
 import com.ibs.donation.dto.DonationResponse;
 import com.ibs.donation.repository.DonationRepository;
+import com.ibs.donation.repository.RecurringDonationScheduleRepository;
 import com.ibs.donation.service.mapper.DonationMapper;
+import com.ibs.donation.service.support.RecurringChargeDateCalculator;
 import com.ibs.global.exception.BusinessException;
 import com.ibs.global.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -30,10 +36,14 @@ public class DonationService {
     private final TossPaymentsClient tossPaymentsClient;
     private final DonationMapper donationMapper;
     private final TossPaymentsProperties tossPaymentsProperties;
+    private final RecurringDonationProperties recurringDonationProperties;
+    private final RecurringDonationScheduleRepository recurringDonationScheduleRepository;
 
     @Transactional
     public DonationPrepareResponse prepareDonation(DonationPrepareRequest request) {
         String orderId = generateOrderId();
+
+        Integer recurringChargeDay = determineRecurringChargeDay(request);
 
         Donation donation = Donation.createPending(
                 orderId,
@@ -43,7 +53,8 @@ public class DonationService {
                 request.donorName(),
                 request.donorEmail(),
                 request.donorPhone(),
-                request.receiptRequired() // Pass the new field from request
+                request.receiptRequired(), // Pass the new field from request
+                recurringChargeDay
         );
 
         donationRepository.save(donation);
@@ -87,10 +98,58 @@ public class DonationService {
                 billingKey
         );
 
+        if (donation.getDonationType() == DonationType.RECURRING && billingKey != null && !billingKey.isBlank()) {
+            initializeRecurringSchedule(donation, approvedAt);
+        }
+
         return donationMapper.toResponse(donation);
     }
 
     private String generateOrderId() {
         return "DON-" + UUID.randomUUID().toString().replace("-", "");
+    }
+
+    private void initializeRecurringSchedule(Donation donation, LocalDateTime approvedAt) {
+        if (recurringDonationScheduleRepository.existsByDonation(donation)) {
+            return;
+        }
+
+        LocalDateTime baseTime = Optional.ofNullable(approvedAt).orElse(LocalDateTime.now());
+        LocalDateTime nextChargeAt = calculateNextChargeAt(baseTime, donation);
+        RecurringDonationSchedule schedule = RecurringDonationSchedule.create(
+                donation,
+                baseTime,
+                recurringDonationProperties.retryIntervalOrDefault(),
+                recurringDonationProperties.maxRetryCountOrDefault(),
+                nextChargeAt
+        );
+        recurringDonationScheduleRepository.save(schedule);
+    }
+
+    private Integer determineRecurringChargeDay(DonationPrepareRequest request) {
+        if (request.donationType() != DonationType.RECURRING) {
+            return null;
+        }
+
+        Integer requestedDay = request.recurringChargeDay();
+        List<Integer> allowedDays = recurringDonationProperties.chargeDaysOrDefault();
+        if (requestedDay == null) {
+            return allowedDays.get(0);
+        }
+
+        if (!allowedDays.contains(requestedDay)) {
+            throw new BusinessException(ErrorCode.INVALID_RECURRING_CHARGE_DAY);
+        }
+
+        return requestedDay;
+    }
+
+    private LocalDateTime calculateNextChargeAt(LocalDateTime reference, Donation donation) {
+        Integer chargeDay = donation.getRecurringChargeDay();
+        if (chargeDay != null) {
+            return RecurringChargeDateCalculator.calculateNextChargeOnDay(reference, chargeDay);
+        }
+
+        return RecurringChargeDateCalculator.calculateNextChargeOnDays(reference, recurringDonationProperties.chargeDaysOrDefault());
     }
 }
