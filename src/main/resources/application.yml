@@ -2,7 +2,7 @@ spring:
   application:
     name: eoc-ko-back
   profiles:
-    active: local # 기본 활성 프로필을 'local'로 설정
+    active: local # �⺻ ȯ�� ���������� 'local'�� ����
   servlet:
     multipart:
       max-file-size: 10MB
@@ -13,16 +13,16 @@ spring:
         registration:
           # ================= GOOGLE =================
           google:
-            client-id: YOUR_GOOGLE_CLIENT_ID_HERE  # 여기에 구글 클라이언트 ID 입력
-            client-secret: YOUR_GOOGLE_CLIENT_SECRET_HERE # 여기에 구글 클라이언트 시크릿 입력
+            client-id: YOUR_GOOGLE_CLIENT_ID_HERE  # ���ø����̼��� Ŭ���̾�Ʈ ID �Է�
+            client-secret: YOUR_GOOGLE_CLIENT_SECRET_HERE # ���ø����̼��� Ŭ���̾�Ʈ ��ũ�� �Է�
             scope:
               - profile
               - email
 
           # ================= NAVER ==================
           naver:
-            client-id: YOUR_NAVER_CLIENT_ID_HERE # 여기에 네이버 클라이언트 ID 입력
-            client-secret: YOUR_NAVER_CLIENT_SECRET_HERE # 여기에 네이버 클라이언트 시크릿 입력
+            client-id: YOUR_NAVER_CLIENT_ID_HERE # ���̹� ���ø����̼��� Ŭ���̾�Ʈ ID �Է�
+            client-secret: YOUR_NAVER_CLIENT_SECRET_HERE # ���̹� ���ø����̼��� Ŭ���̾�Ʈ ��ũ�� �Է�
             client-authentication-method: client_secret_post
             authorization-grant-type: authorization_code
             redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
@@ -55,8 +55,8 @@ springdoc:
 # JWT
 jwt:
   secret: 'wJalr7JtL4VklA4aEW/B1A3oA8gQyJ5aA+8eN/aT4bHq8cW+lY6zR/aN9vY8bV7cW+lY6zR/aN9vY8bV7cW+lY6zR/aN9vY8bV7cW+lY6zR/aN9vY8bV7c='
-  token-validity-in-seconds: 86400 # 1일 (Access Token)
-  refresh-token-validity-in-seconds: 604800 # 7일 (Refresh Token)
+  token-validity-in-seconds: 86400 # 1��(Access Token)
+  refresh-token-validity-in-seconds: 604800 # 7��(Refresh Token)
 
 # File
 file:
@@ -70,3 +70,9 @@ cloudflare:
     id: ef7bc155ee8a5d229c2086d399721c87
   base:
     url: https://api.cloudflare.com/client/v4
+
+toss:
+  payments:
+    secret-key: test_sk_6BYq7GWPVvP7v4YjY6PX8NE5vbo1
+    client-key: test_ck_jExPeJWYVQeoAYKLwEDvV49R5gvN
+    base-url: https://api.tosspayments.com

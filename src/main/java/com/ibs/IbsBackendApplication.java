@@ -1,5 +1,6 @@
 package com.ibs;
 
+import com.ibs.donation.config.TossPaymentsProperties;
 import com.ibs.user.domain.Role;
 import com.ibs.user.domain.User;
 import com.ibs.user.domain.UserStatus;
@@ -15,7 +16,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
-@EnableConfigurationProperties(JwtProperties.class)
+@EnableConfigurationProperties({JwtProperties.class, TossPaymentsProperties.class})
 @EnableCaching
 //@EnableJpaAuditing
 public class IbsBackendApplication {
@@ -31,7 +32,7 @@ public class IbsBackendApplication {
                 User adminUser = User.builder()
                         .username("admin")
                         .password(passwordEncoder.encode("admin"))
-                        .name("관리자")
+                        .name("admin")
                         .email("admin@example.com")
                         .phoneNumber(null)
                         .jobTitle("관리자")
