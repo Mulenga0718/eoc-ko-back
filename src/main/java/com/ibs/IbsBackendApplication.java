@@ -1,5 +1,6 @@
 package com.ibs;
 
+import com.ibs.donation.config.RecurringDonationProperties;
 import com.ibs.donation.config.TossPaymentsProperties;
 import com.ibs.user.domain.Role;
 import com.ibs.user.domain.User;
@@ -13,11 +14,13 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
-@EnableConfigurationProperties({JwtProperties.class, TossPaymentsProperties.class})
+@EnableConfigurationProperties({JwtProperties.class, TossPaymentsProperties.class, RecurringDonationProperties.class})
 @EnableCaching
+@EnableScheduling
 //@EnableJpaAuditing
 public class IbsBackendApplication {
 

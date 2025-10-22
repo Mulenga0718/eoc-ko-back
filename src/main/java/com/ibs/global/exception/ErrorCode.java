@@ -25,7 +25,8 @@ public enum ErrorCode {
     // Payment & Donation Errors
     PAYMENT_CONFIRM_FAILED(HttpStatus.BAD_GATEWAY, "P001", "Failed to confirm the payment."),
     DONATION_NOT_FOUND(HttpStatus.NOT_FOUND, "D001", "Donation record was not found."),
-    DONATION_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "D002", "Donation amount does not match.");
+    DONATION_AMOUNT_MISMATCH(HttpStatus.BAD_REQUEST, "D002", "Donation amount does not match."),
+    INVALID_RECURRING_CHARGE_DAY(HttpStatus.BAD_REQUEST, "D003", "Invalid recurring charge day provided.");
 
     private final HttpStatus status;
     private final String code;

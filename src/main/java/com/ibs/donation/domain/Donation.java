@@ -79,6 +79,9 @@ public class Donation extends BaseTimeEntity {
     @Column(nullable = false)
     private boolean receiptRequired;
 
+    @Column(name = "recurring_charge_day")
+    private Integer recurringChargeDay;
+
     public static Donation createPending(String orderId,
                                          String orderName,
                                          Long amount,
@@ -86,7 +89,8 @@ public class Donation extends BaseTimeEntity {
                                          String donorName,
                                          String donorEmail,
                                          String donorPhone,
-                                         boolean receiptRequired) {
+                                         boolean receiptRequired,
+                                         Integer recurringChargeDay) {
         return Donation.builder()
                 .orderId(orderId)
                 .orderName(orderName)
@@ -97,6 +101,7 @@ public class Donation extends BaseTimeEntity {
                 .donorPhone(donorPhone)
                 .status(DonationStatus.PENDING)
                 .receiptRequired(receiptRequired) // Set the new field
+                .recurringChargeDay(recurringChargeDay)
                 .build();
     }
 

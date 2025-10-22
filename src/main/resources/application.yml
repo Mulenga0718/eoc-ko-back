@@ -76,3 +76,14 @@ toss:
     secret-key: test_sk_6BYq7GWPVvP7v4YjY6PX8NE5vbo1
     client-key: test_ck_jExPeJWYVQeoAYKLwEDvV49R5gvN
     base-url: https://api.tosspayments.com
+
+donation:
+  recurring:
+    charge-days:
+      - 5
+      - 10
+      - 15
+      - 25
+    retry-interval: P1D
+    max-retry-count: 3
+    scheduler-interval: PT1H

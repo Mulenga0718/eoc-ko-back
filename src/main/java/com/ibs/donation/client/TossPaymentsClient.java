@@ -1,5 +1,6 @@
 package com.ibs.donation.client;
 
+import com.ibs.donation.client.dto.TossPaymentsBillingKeyChargeRequest;
 import com.ibs.donation.client.dto.TossPaymentsConfirmResponse;
 import com.ibs.donation.client.dto.TossPaymentsErrorResponse;
 import com.ibs.donation.config.TossPaymentsProperties;
@@ -49,8 +50,22 @@ public class TossPaymentsClient {
                 .onStatus(status -> status.isError(), clientResponse -> clientResponse
                         .bodyToMono(TossPaymentsErrorResponse.class)
                         .defaultIfEmpty(new TossPaymentsErrorResponse("UNKNOWN", "Toss Payments error occurred"))
-                        .flatMap(error -> Mono.error(new TossPaymentsApiException(error.message() + " (" + error.code() + ")"))
-                        ))
+                        .flatMap(error -> Mono.error(new TossPaymentsApiException(error.message() + " (" + error.code() + ")")))))
+                .bodyToMono(TossPaymentsConfirmResponse.class)
+                .block();
+    }
+
+    public TossPaymentsConfirmResponse chargeBillingKey(String billingKey, TossPaymentsBillingKeyChargeRequest request) {
+        return getClient().post()
+                .uri(uriBuilder -> uriBuilder
+                        .path("/v1/billing/authorizations/{billingKey}")
+                        .build(billingKey))
+                .bodyValue(request.toRequestBody())
+                .retrieve()
+                .onStatus(status -> status.isError(), clientResponse -> clientResponse
+                        .bodyToMono(TossPaymentsErrorResponse.class)
+                        .defaultIfEmpty(new TossPaymentsErrorResponse("UNKNOWN", "Toss Payments error occurred"))
+                        .flatMap(error -> Mono.error(new TossPaymentsApiException(error.message() + " (" + error.code() + ")")))))
                 .bodyToMono(TossPaymentsConfirmResponse.class)
                 .block();
     }

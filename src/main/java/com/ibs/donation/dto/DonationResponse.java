@@ -21,6 +21,7 @@ public record DonationResponse(
         String donorName,
         String donorEmail,
         String donorPhone,
+        Integer recurringChargeDay,
         LocalDateTime approvedAt,
         String failureMessage,
         LocalDateTime createdAt,
