@@ -50,7 +50,7 @@ public class TossPaymentsClient {
                 .onStatus(status -> status.isError(), clientResponse -> clientResponse
                         .bodyToMono(TossPaymentsErrorResponse.class)
                         .defaultIfEmpty(new TossPaymentsErrorResponse("UNKNOWN", "Toss Payments error occurred"))
-                        .flatMap(error -> Mono.error(new TossPaymentsApiException(error.message() + " (" + error.code() + ")")))))
+                        .flatMap(error -> Mono.error(new TossPaymentsApiException(error.message() + " (" + error.code() + ")"))))
                 .bodyToMono(TossPaymentsConfirmResponse.class)
                 .block();
     }
@@ -65,7 +65,7 @@ public class TossPaymentsClient {
                 .onStatus(status -> status.isError(), clientResponse -> clientResponse
                         .bodyToMono(TossPaymentsErrorResponse.class)
                         .defaultIfEmpty(new TossPaymentsErrorResponse("UNKNOWN", "Toss Payments error occurred"))
-                        .flatMap(error -> Mono.error(new TossPaymentsApiException(error.message() + " (" + error.code() + ")")))))
+                        .flatMap(error -> Mono.error(new TossPaymentsApiException(error.message() + " (" + error.code() + ")"))))
                 .bodyToMono(TossPaymentsConfirmResponse.class)
                 .block();
     }

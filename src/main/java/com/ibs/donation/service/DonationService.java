@@ -2,6 +2,8 @@ package com.ibs.donation.service;
 
 import com.ibs.donation.client.TossPaymentsClient;
 import com.ibs.donation.client.dto.TossPaymentsConfirmResponse;
+import com.ibs.donation.domain.DonorType;
+import com.ibs.donation.domain.OrganizationDetails;
 import com.ibs.donation.config.RecurringDonationProperties;
 import com.ibs.donation.config.TossPaymentsProperties;
 import com.ibs.donation.domain.Donation;
@@ -17,7 +19,11 @@ import com.ibs.donation.service.mapper.DonationMapper;
 import com.ibs.donation.service.support.RecurringChargeDateCalculator;
 import com.ibs.global.exception.BusinessException;
 import com.ibs.global.exception.ErrorCode;
+import com.ibs.user.service.CustomUserDetails;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import com.ibs.user.domain.User; // User 엔티티 임포트
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -45,6 +51,22 @@ public class DonationService {
 
         Integer recurringChargeDay = determineRecurringChargeDay(request);
 
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        CustomUserDetails customUserDetails = (CustomUserDetails) authentication.getPrincipal();
+        User authenticatedUser = customUserDetails.getUser();
+
+        OrganizationDetails orgDetails = null;
+        if (request.donorType() == DonorType.ORG && request.organization() != null) {
+            var orgRequest = request.organization();
+            var managerRequest = orgRequest.manager();
+            orgDetails = OrganizationDetails.builder()
+                    .organizationName(orgRequest.name())
+                    .businessNumber(orgRequest.businessNumber())
+                    .managerName(managerRequest.name())
+                    .managerEmail(managerRequest.email())
+                    .build();
+        }
+
         Donation donation = Donation.createPending(
                 orderId,
                 request.orderName(),
@@ -54,7 +76,10 @@ public class DonationService {
                 request.donorEmail(),
                 request.donorPhone(),
                 request.receiptRequired(), // Pass the new field from request
-                recurringChargeDay
+                recurringChargeDay,
+                request.donorType(),
+                orgDetails,
+                authenticatedUser // 현재 인증된 사용자 정보 전달
         );
 
         donationRepository.save(donation);

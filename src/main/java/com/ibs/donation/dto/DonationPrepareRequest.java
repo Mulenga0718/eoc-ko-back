@@ -1,5 +1,7 @@
 package com.ibs.donation.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.ibs.donation.domain.DonorType;
 import com.ibs.donation.domain.DonationType;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
@@ -32,11 +34,35 @@ public record DonationPrepareRequest(
         @NotNull(message = "Receipt required status is required.")
         boolean receiptRequired,
 
-        Integer recurringChargeDay
+        @JsonProperty("billingDay") // 프론트엔드의 'billingDay'를 이 필드에 매핑
+        Integer recurringChargeDay,
+
+        @NotNull(message = "Donor type is required.")
+        DonorType donorType,
+
+        OrganizationRequest organization
 ) {
+    public record OrganizationRequest(
+            @NotBlank(message = "Organization name is required.")
+            String name,
+            String businessNumber,
+            @NotNull(message = "Manager details are required.")
+            ContactRequest manager
+    ) {}
+
+    public record ContactRequest(
+            @NotBlank(message = "Manager name is required.")
+            String name,
+            @Email(message = "Please provide a valid manager email address.")
+            String email
+    ) {}
+
     public DonationPrepareRequest {
         if (donationType == null) {
             donationType = DonationType.ONE_TIME;
+        }
+        if (donorType == DonorType.ORG && organization == null) {
+            throw new IllegalArgumentException("Organization details are required for organization donors.");
         }
     }
 }

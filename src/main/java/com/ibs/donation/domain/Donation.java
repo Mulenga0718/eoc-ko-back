@@ -7,6 +7,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import com.ibs.user.domain.User; // User 엔티티 임포트
 import org.hibernate.annotations.GenericGenerator;
 
 import java.time.LocalDateTime;
@@ -50,6 +51,17 @@ public class Donation extends BaseTimeEntity {
     @Column(nullable = false, length = 20)
     private DonationType donationType;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    private DonorType donorType;
+
+    @Embedded
+    private OrganizationDetails organizationDetails;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id") // User 테이블의 PK를 참조하는 FK
+    private User user;
+
     @Column(length = 100)
     private String donorName;
 
@@ -90,18 +102,24 @@ public class Donation extends BaseTimeEntity {
                                          String donorEmail,
                                          String donorPhone,
                                          boolean receiptRequired,
-                                         Integer recurringChargeDay) {
+                                         Integer recurringChargeDay,
+                                         DonorType donorType,
+                                         OrganizationDetails organizationDetails,
+                                         User user) { // User 객체 추가
         return Donation.builder()
                 .orderId(orderId)
                 .orderName(orderName)
                 .amount(amount)
-                .donationType(donationType)
+                .donationType(donationType) // Set the new field
                 .donorName(donorName)
                 .donorEmail(donorEmail)
                 .donorPhone(donorPhone)
                 .status(DonationStatus.PENDING)
                 .receiptRequired(receiptRequired) // Set the new field
                 .recurringChargeDay(recurringChargeDay)
+                .donorType(donorType)
+                .organizationDetails(organizationDetails)
+                .user(user) // User 객체 설정
                 .build();
     }
 
